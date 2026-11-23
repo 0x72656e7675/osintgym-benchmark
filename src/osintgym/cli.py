@@ -153,7 +153,7 @@ def cmd_schema(args) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(prog="osintgym", description="OSINTGym benchmark for OSINT and SOCMINT agents.")
+    parser = argparse.ArgumentParser(prog="osintgym", description="OSINTGym benchmark for OSINT agents.")
     parser.add_argument("--version", action="version", version=f"osintgym {__version__} (world {WORLD_VERSION})")
     sub = parser.add_subparsers(dest="command_name", required=True)
 

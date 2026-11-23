@@ -17,22 +17,6 @@ and every request is logged against the attempt that made it.
 
 The live site and leaderboard are at [osintgym.com](https://osintgym.com).
 
-## Why another benchmark
-
-The attempts so far measure something narrower. [OSINTbench](https://github.com/ccmdi/osintbench) defines four
-task types (geolocation, identification, temporal and analysis questions) but ships no dataset, runs its tools
-against the live web, and grades three of the four types with a language model judge.
-[Buried Signals](https://benchmarks.buriedsignals.com) publishes a closed-book study of fifteen investigative
-questions alongside 39 tool cases, with one ethics probe checked by hand.
-[GeoBrowse](https://arxiv.org/abs/2604.04017) covers agentic geolocation with expert-annotated reasoning traces. A
-2026 survey of 74 studies on agentic AI for OSINT ([arXiv 2607.03233](https://arxiv.org/abs/2607.03233)) argues that
-evaluation has not kept pace with the capabilities being reported.
-
-OSINTGym takes its structure from security benchmarks instead. Like [CyberGym](https://github.com/sunblaze-ucb/cybergym)
-and [ExploitGym](https://arxiv.org/abs/2605.11086), it generates many tasks from one specification, verifies outcomes
-by checking them rather than by asking a judge, controls how much help the agent receives, and seals the environment
-so that the answer cannot be fetched from outside. OSINTGym is not affiliated with either project.
-
 ## What it measures
 
 | Track | Family | The agent must | Answer |

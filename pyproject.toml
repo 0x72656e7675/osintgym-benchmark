@@ -5,13 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "osintgym"
 version = "0.1.0"
-description = "Reproducible, sandboxed benchmark for OSINT and SOCMINT agents: capability, harness and safeguard evaluation."
+description = "Reproducible, sandboxed benchmark for OSINT agents: capability, harness and safeguard evaluation."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "LICENSE-DATA.md", "NOTICE"]
 requires-python = ">=3.11"
 authors = [{ name = "Durandir Technologies" }]
-keywords = ["osint", "socmint", "benchmark", "agents", "llm", "evaluation", "safety"]
+keywords = ["osint", "benchmark", "agents", "llm", "evaluation", "safety"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",

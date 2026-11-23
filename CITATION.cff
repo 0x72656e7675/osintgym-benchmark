@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use OSINTGym, please cite it as below."
-title: "OSINTGym: a sealed-world benchmark for OSINT and SOCMINT agents, their harnesses and their safeguards"
+title: "OSINTGym: a sealed-world benchmark for OSINT agents, their harnesses and their safeguards"
 type: software
 authors:
   - name: "Durandir Technologies"
@@ -11,7 +11,6 @@ repository-code: "https://github.com/0x72656e7675/osintgym-benchmark"
 url: "https://osintgym.com"
 keywords:
   - osint
-  - socmint
   - benchmark
   - ai-agents
   - ai-safety
