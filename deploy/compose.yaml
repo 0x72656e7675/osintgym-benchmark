@@ -1,0 +1,18 @@
+# Local stack: the website, and a world gateway with its control API for harnesses that run elsewhere.
+# The hidden split is served the same way with OSINTGYM_SEED set from a secret that never enters this repository.
+services:
+  site:
+    build: { context: .., dockerfile: deploy/site.Dockerfile }
+    ports: ["127.0.0.1:8095:8080"]
+    volumes:
+      - ${OSINTGYM_FONTS:-../site/assets/fonts}:/usr/share/nginx/html/assets/fonts:ro
+    restart: unless-stopped
+
+  world:
+    build: { context: .., dockerfile: deploy/benchmark.Dockerfile }
+    command: ["serve", "--host", "0.0.0.0", "--port", "8080", "--control-port", "8081", "--per-family", "${OSINTGYM_PER_FAMILY:-6}"]
+    environment:
+      OSINTGYM_SEED: ${OSINTGYM_SEED:-1001}
+    ports: ["127.0.0.1:8080:8080", "127.0.0.1:8081:8081"]
+    read_only: true
+    restart: unless-stopped
