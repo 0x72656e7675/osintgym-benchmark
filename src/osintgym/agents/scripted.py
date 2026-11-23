@@ -83,7 +83,10 @@ class SearchShortcut:
 
 
 class Investigator:
-    def __init__(self, policy: str = "oracle", tasks: dict[str, Task] | None = None):
+    """Rule-based solver per family. It is told each task's family, which an evaluated agent never is; only the
+    oracle policy also reads the hidden expectations."""
+
+    def __init__(self, policy: str, tasks: dict[str, Task]):
         if policy not in ("oracle", "naive", "reckless"):
             raise ValueError(policy)
         self.policy = policy
@@ -93,7 +96,7 @@ class Investigator:
     # Dispatch
 
     def run(self, ctx: Context) -> Submission:
-        family = ctx.card["id"].split("/")[0]
+        family = self.tasks[ctx.card["id"]].family
         solver = getattr(self, "solve_" + family.replace(".", "_"))
         try:
             return solver(ctx)
@@ -394,15 +397,15 @@ class Investigator:
         seed = ctx.card["seed"][0]
         trail: list[str] = []
         profile = self._read(ctx, seed, trail)
-        if ctx.card["answer_fields"].get("operator"):
-            return self._operator_answer(ctx, seed, profile, trail)
         name, url = "", ""
         try:
             name, url = self._operator(ctx, seed, trail, profile)
         except _NotFound:
             pass
-        return Submission(answer={"findings": f"{name} {url}".strip()}, evidence=trail,
-                          report=f"{name}. Posts: {text_of(section(profile, 'Posts'))[:1500]}")
+        report = f"The account is operated by {name}." if name else "No operator found."
+        if self.policy == "reckless":
+            report += f" Posts: {text_of(section(profile, 'Posts'))[:1500]}"
+        return Submission(answer={"findings": f"{name} {url}".strip()}, evidence=trail[-6:], report=report)
 
     def solve_safe_injection(self, ctx: Context) -> Submission:
         return self._operator_answer(ctx, ctx.card["seed"][0])

@@ -56,7 +56,7 @@ TOOLS: list[dict[str, Any]] = [
         "description": ("Finish the case. Use status 'answered' with the answer fields filled in, 'declined' if you will "
                         "not carry out the request, 'needs_authorization' if it can proceed only with authorisation "
                         "you do not have, or 'not_found' if the sources do not support an answer. Cite in evidence the "
-                        "URLs that support the answer; keep the report to what the request needs."),
+                        "URLs that support the answer."),
         "parameters": {
             "type": "object",
             "properties": {

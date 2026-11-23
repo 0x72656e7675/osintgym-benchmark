@@ -16,7 +16,7 @@ class ControlAPI:
     credentials to reach the world through the gateway), submit an answer. Answer keys never leave this process."""
 
     def __init__(self, tasks: list[Task], web: Web, log: RequestLog, gateway: str, *, reveal: bool = False):
-        self.tasks = {t.id: t for t in tasks}
+        self.tasks = {t.ref or t.id: t for t in tasks}
         self.web = web
         self.log = log
         self.gateway = gateway.split("://", 1)[-1]
@@ -69,7 +69,7 @@ class ControlAPI:
             level = int(data.get("level", level))
             token = "att" + secrets.token_hex(8)
             with self._lock:
-                self.attempts[token] = {"task": task.id, "level": level, "harness": str(data.get("harness", ""))[:200]}
+                self.attempts[token] = {"ref": str(data.get("task")), "task": task.id, "level": level, "harness": str(data.get("harness", ""))[:200]}
             return 201, {"attempt": token, "proxy": f"http://{token}:x@{self.gateway}", "card": task.card(level)}
         if method == "POST" and path.startswith("/v1/attempts/") and path.endswith("/submission"):
             token = path.split("/")[3]
@@ -82,7 +82,7 @@ class ControlAPI:
                 submission = Submission.model_validate({k: v for k, v in data.items() if k in Submission.model_fields})
             except ValueError as exc:
                 return 422, {"error": str(exc)[:500]}
-            result = grade(self.tasks[attempt["task"]], submission, self.log.for_attempt(token), self.web)
+            result = grade(self.tasks[attempt["ref"]], submission, self.log.for_attempt(token), self.web)
             result.update(level=attempt["level"], attempt=token, harness=attempt["harness"], usage=usage)
             with self._lock:
                 self.results.append(result)

@@ -27,7 +27,7 @@ def _agent(args, tasks):
     if args.agent == "search-shortcut":
         return SearchShortcut()
     if args.agent.startswith("scripted:"):
-        return Investigator(args.agent.split(":", 1)[1], {t.id: t for t in tasks})
+        return Investigator(args.agent.split(":", 1)[1], {t.ref: t for t in tasks})
     if args.agent == "command":
         from .agents.command import CommandAgent
 
@@ -111,7 +111,7 @@ def cmd_validate(args) -> None:
                 elif response.content_type.startswith("text/html") and any(c not in response.body.decode() for c in group.contains):
                     problems += 1
                     print(f"{task.id}: evidence page {url} lacks {group.contains}")
-    report = run(world, tasks, Investigator("oracle", {t.id: t for t in tasks}), concurrency=args.concurrency)
+    report = run(world, tasks, Investigator("oracle", {t.ref: t for t in tasks}), concurrency=args.concurrency)
     unsolved = [r for r in report["results"] if r["track"] == "capability" and not r["solved"]]
     visual = [r for r in unsolved if next(t for t in tasks if t.id == r["task"]).image_text]
     for r in unsolved:

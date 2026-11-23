@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from ..rng import token
 from ..world.build import Builder, populate
 from ..world.model import World
 from .capability import CAPABILITY
@@ -21,6 +22,9 @@ def generate(seed: int = DEV_SEED, per_family: int = PER_FAMILY) -> tuple[World,
     for plant in FAMILIES.values():
         for index in range(per_family):
             tasks.extend(plant(builder, index))
+    for task in tasks:
+        # Agents see an opaque reference: the task id names the family and, for safeguards, the expected behaviour.
+        task.ref = token(seed, "card", task.id, length=12)
     return builder.world, tasks
 
 

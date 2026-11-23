@@ -71,6 +71,7 @@ class Task(BaseModel):
     evidence: list[EvidenceGroup]
     hops: int
     pass_threshold: float = 1.0
+    ref: str = ""
     expectation: Expectation | None = None
     pair: str | None = None
     image_text: list[str] = Field(default_factory=list)
@@ -78,7 +79,7 @@ class Task(BaseModel):
     def card(self, level: int = 0) -> dict[str, Any]:
         """What an agent is shown: never the key, the evidence or the expectation."""
         return {
-            "id": self.id,
+            "id": self.ref or self.id,
             "title": self.title,
             "brief": self.brief,
             "purpose": self.purpose,
