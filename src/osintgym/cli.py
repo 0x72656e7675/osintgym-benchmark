@@ -11,11 +11,17 @@ from . import CANARY, WORLD_VERSION, __version__
 from .agents.base import Budget
 
 
-def _world(args):
-    from .tasks import generate, select
+def _split(args):
+    from .tasks import generate
 
     seed = int(os.environ["OSINTGYM_SEED"]) if args.seed is None and "OSINTGYM_SEED" in os.environ else (args.seed or 1001)
-    world, tasks = generate(seed, args.per_family)
+    return generate(seed, args.per_family)
+
+
+def _world(args):
+    from .tasks import select
+
+    world, tasks = _split(args)
     return world, select(tasks, args.family, args.track)
 
 
@@ -27,6 +33,8 @@ def _agent(args, tasks):
     if args.agent == "search-shortcut":
         return SearchShortcut()
     if args.agent.startswith("scripted:"):
+        if not tasks:
+            sys.exit("scripted investigators read the answer keys, so they cannot run on a remote split")
         return Investigator(args.agent.split(":", 1)[1], {t.ref: t for t in tasks})
     if args.agent == "command":
         from .agents.command import CommandAgent
@@ -57,11 +65,25 @@ def cmd_tasks(args) -> None:
 
 def cmd_run(args) -> None:
     from .report import markdown
-    from .runner import run, save
+    from .runner import run, run_remote, save
 
+    budget = Budget(args.max_steps, args.max_seconds, args.max_output_tokens)
+    if args.remote:
+        key = os.environ.get("OSINTGYM_KEY")
+        if not key:
+            sys.exit("set OSINTGYM_KEY to the run key issued for the hidden split")
+        agent = _agent(args, [])
+        receipt = run_remote(args.remote, key, agent, budget=budget, concurrency=args.concurrency)
+        path = save(receipt, args.out or f"results/remote-{agent.name.replace('/', '_')}-{int(time.time())}.json")
+        progress = receipt["progress"]
+        failed = sum(1 for a in receipt["attempts"] if a["error"])
+        print(f"{len(receipt['attempts'])} attempts this session, {failed} with errors. The run has submitted "
+              f"{progress['submitted']} of {progress['tasks'] * progress['repeats']} attempts; "
+              f"{len(progress['open'])} are open. Scores are published when the run is verified.")
+        print(f"Saved {path}")
+        return
     world, tasks = _world(args)
     agent = _agent(args, tasks)
-    budget = Budget(args.max_steps, args.max_seconds, args.max_output_tokens)
     meta = {"label": args.label, "model": args.model, "provider": args.agent if args.agent in ("anthropic", "openai") else None,
             "effort": args.effort, "families": args.family, "track": args.track, "per_family": args.per_family}
     report = run(world, tasks, agent, level=args.level, repeats=args.repeats, budget=budget,
@@ -131,19 +153,86 @@ def cmd_serve(args) -> None:
     from .gateway import Gateway, RequestLog, Server
     from .runner import prepare
 
+    store = None
+    if args.state:
+        from .hosting import Store
+
+        if args.reveal:
+            sys.exit("--reveal returns grades and is for the development split, not a hosted split")
+        store = Store(args.state)
     world, tasks = _world(args)
     web = prepare(world)
-    log = RequestLog()
-    with Server(Gateway(web, log), args.host, args.port) as gateway:
+    log = RequestLog(store.request if store else None)
+    world_gateway = Gateway(web, log)
+    with Server(world_gateway, args.host, args.port) as gateway:
         public = args.public_gateway or gateway.url
-        with Server(ControlAPI(tasks, web, log, public, reveal=args.reveal), args.host, args.control_port) as control:
-            print(f"World gateway {gateway.url} (HTTP proxy; credentials name the attempt)")
-            print(f"Control API   {control.url}/v1/tasks")
+        api = ControlAPI(tasks, web, log, public, reveal=args.reveal, store=store)
+        if store is not None:
+            world_gateway.admit = api.admits
+        with Server(api, args.host, args.control_port) as control:
+            print(f"World gateway {gateway.url} (HTTP proxy, or {gateway.url}/gateway/ATTEMPT/HOST/PATH)")
+            print(f"Control API   {control.url}/v1/tasks" + (f" (run keys and state in {args.state})" if store else ""))
             try:
                 while True:
                     time.sleep(3600)
             except KeyboardInterrupt:
                 pass
+
+
+def cmd_relay(args) -> None:
+    from .gateway import Relay, Server
+
+    with Server(Relay(args.gateway), args.host, args.port) as relay:
+        host = relay.url.split("://", 1)[1]
+        print(f"Relay {relay.url} to {args.gateway}: use HTTP_PROXY=http://ATTEMPT:x@{host}")
+        try:
+            while True:
+                time.sleep(3600)
+        except KeyboardInterrupt:
+            pass
+
+
+def cmd_runs(args) -> None:
+    from .hosting import Store, verify
+    from .runner import prepare
+
+    if not args.state:
+        sys.exit("--state or OSINTGYM_STATE is required")
+    store = Store(args.state)
+    if args.runs_command == "issue":
+        budget = Budget(args.max_steps, args.max_seconds, args.max_output_tokens).as_dict()
+        run_id, key = store.issue(system=args.system, model=args.model or "", harness=args.harness or "",
+                                  note=args.note or "", level=args.level, repeats=args.repeats, budget=budget)
+        print(json.dumps({"run": run_id, "key": key}))
+        return
+    runs = store.runs()
+    if args.runs_command == "list":
+        attempts = store.attempts()
+        submitted = set(store.submissions())
+        published = store.published()
+        for run_id, run in runs.items():
+            mine = [a for a in attempts if a.get("run") == run_id]
+            print(json.dumps({"run": run_id, **{k: v for k, v in run.items() if k != "key_sha256"},
+                              "opened": len(mine), "submitted": sum(1 for a in mine if a["attempt"] in submitted),
+                              "published": run_id in published}, default=str))
+        return
+    if args.run not in runs:
+        sys.exit(f"unknown run {args.run}")
+    if args.runs_command == "close":
+        store.update_run(args.run, closed=time.time())
+    elif args.runs_command == "withdraw":
+        store.publish(args.run, None)
+    elif args.runs_command == "verify":
+        world, tasks = _split(args)
+        try:
+            out = verify(store, args.run, tasks, prepare(world))
+        except ValueError as exc:
+            sys.exit(str(exc))
+        path = store.save_report(args.run, out["report"])
+        if args.publish:
+            store.publish(args.run, out["row"])
+        print(json.dumps({"row": out["row"], "integrity": out["report"]["integrity"], "report": str(path),
+                          "published": args.publish}, indent=1))
 
 
 def cmd_schema(args) -> None:
@@ -157,11 +246,20 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--version", action="version", version=f"osintgym {__version__} (world {WORLD_VERSION})")
     sub = parser.add_subparsers(dest="command_name", required=True)
 
-    def world_options(p) -> None:
+    def split_options(p) -> None:
         p.add_argument("--seed", type=int, default=None, help="world seed (default 1001, the public dev split; or OSINTGYM_SEED)")
-        p.add_argument("--per-family", type=int, default=6, help="scenarios per family; part of the split definition")
+        p.add_argument("--per-family", type=int, default=int(os.environ.get("OSINTGYM_PER_FAMILY", 6)),
+                       help="scenarios per family; part of the split definition (or OSINTGYM_PER_FAMILY)")
+
+    def world_options(p) -> None:
+        split_options(p)
         p.add_argument("--family", action="append", help="run only these families (repeatable)")
         p.add_argument("--track", choices=["capability", "safeguards"])
+
+    def budget_options(p) -> None:
+        p.add_argument("--max-steps", type=int, default=Budget.max_steps)
+        p.add_argument("--max-seconds", type=float, default=Budget.max_seconds)
+        p.add_argument("--max-output-tokens", type=int, default=Budget.max_output_tokens)
 
     p = sub.add_parser("tasks", help="export task cards, or full tasks with keys")
     world_options(p)
@@ -188,9 +286,9 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--level", type=int, default=0, choices=[0, 1, 2, 3])
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--concurrency", type=int, default=8)
-    p.add_argument("--max-steps", type=int, default=Budget.max_steps)
-    p.add_argument("--max-seconds", type=float, default=Budget.max_seconds)
-    p.add_argument("--max-output-tokens", type=int, default=Budget.max_output_tokens)
+    budget_options(p)
+    p.add_argument("--remote", metavar="URL",
+                   help="run on a split served elsewhere, such as https://osintgym.com, with the run key in OSINTGYM_KEY")
     p.add_argument("--out")
     p.set_defaults(func=cmd_run)
 
@@ -215,7 +313,35 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--control-port", type=int, default=8081)
     p.add_argument("--public-gateway", help="gateway address as harnesses reach it, if different")
     p.add_argument("--reveal", action="store_true", help="return grades on submission (development split only)")
+    p.add_argument("--state", default=os.environ.get("OSINTGYM_STATE"),
+                   help="serve a hidden split: run keys, attempts, request log and submissions in this directory")
     p.set_defaults(func=cmd_serve)
+
+    p = sub.add_parser("relay", help="local HTTP proxy for harnesses, in front of a gateway reached over HTTPS")
+    p.add_argument("--gateway", required=True, help="gateway path-form base, such as https://osintgym.com/gateway")
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8899)
+    p.set_defaults(func=cmd_relay)
+
+    p = sub.add_parser("runs", help="issue, list, close and verify runs on a hosted split")
+    p.add_argument("--state", default=os.environ.get("OSINTGYM_STATE"), help="state directory of the hosted split")
+    runs = p.add_subparsers(dest="runs_command", required=True)
+    q = runs.add_parser("issue", help="issue a run and print its key once")
+    q.add_argument("--system", required=True, help="name shown on the leaderboard")
+    q.add_argument("--model", help="model identifier, as it will be listed")
+    q.add_argument("--harness", help="harness, as it will be listed")
+    q.add_argument("--note")
+    q.add_argument("--level", type=int, default=0, choices=[0, 1, 2, 3])
+    q.add_argument("--repeats", type=int, default=1, help="attempts the run opens per task, all of them graded")
+    budget_options(q)
+    runs.add_parser("list", help="list runs and their progress")
+    for name, text in (("close", "stop a run from opening attempts"), ("withdraw", "remove a run's published row")):
+        runs.add_parser(name, help=text).add_argument("run")
+    q = runs.add_parser("verify", help="grade a run into a results report and a leaderboard row")
+    q.add_argument("run")
+    q.add_argument("--publish", action="store_true", help="also publish the row at /v1/leaderboard")
+    split_options(q)
+    p.set_defaults(func=cmd_runs)
 
     p = sub.add_parser("schema", help="print the JSON schemas of tasks and submissions")
     p.set_defaults(func=cmd_schema)

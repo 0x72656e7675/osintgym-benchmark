@@ -95,13 +95,27 @@
 
   document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => show(b.dataset.view)));
 
+  const current = () => document.querySelector('.tabs button[aria-selected="true"]')?.dataset.view || "overview";
+  const describe = (data) => {
+    const latest = rows.map((r) => r.date).sort().pop();
+    meta.textContent = `World ${data.world_version} | OSINTGym ${data.osintgym}${latest ? ` | updated ${latest}` : ""}`;
+  };
+
   fetch("data/leaderboard.json", { cache: "no-store" })
     .then((r) => r.json())
     .then((data) => {
       rows = data.rows || [];
-      const latest = rows.map((r) => r.date).sort().pop();
-      meta.textContent = `World ${data.world_version} | OSINTGym ${data.osintgym}${latest ? ` | updated ${latest}` : ""}`;
+      describe(data);
       show("overview");
+      fetch("v1/leaderboard", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : { rows: [] }))
+        .then((verified) => {
+          if (!verified.rows?.length) return;
+          rows = rows.concat(verified.rows);
+          describe(data);
+          show(current());
+        })
+        .catch(() => {});
     })
     .catch(() => { meta.textContent = "Results could not be loaded"; board.innerHTML = '<div class="empty"><strong>Results unavailable</strong>Try again later.</div>'; });
 

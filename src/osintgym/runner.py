@@ -10,9 +10,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import httpx
+
 from . import CANARY, WORLD_VERSION, __version__
 from .agents.base import Agent, Budget, Context
-from .gateway import Gateway, RequestLog, Server
+from .gateway import Gateway, Relay, RequestLog, Server
 from .grading.score import grade, summarize
 from .tasks.model import Submission, Task
 from .world.model import World
@@ -72,6 +74,55 @@ def run(world: World, tasks: list[Task], agent: Agent, *, level: int = 0, repeat
         "summary": summarize(results),
         "results": results,
     }
+
+
+def run_remote(api: str, key: str, agent: Agent, *, budget: Budget | None = None,
+               concurrency: int = 8) -> dict[str, Any]:
+    """Runs an agent on a split served elsewhere, such as the hidden split. Its world traffic goes through a local
+    relay to the server's gateway, so proxy-based harnesses run unchanged. The server keeps the keys and the grades,
+    so this returns what was submitted, not scores. Open attempts of the run are resumed and used-up tasks skipped,
+    so an interrupted run continues when started again with the same key."""
+    budget = budget or Budget()
+    client = httpx.Client(base_url=api.rstrip("/"), headers={"Authorization": f"Bearer {key}"}, timeout=60.0)
+
+    def call(method: str, path: str, **kwargs: Any) -> Any:
+        response = client.request(method, path, **kwargs)
+        if response.status_code >= 400:
+            raise RuntimeError(f"{method} {path}: HTTP {response.status_code} {response.text[:300]}")
+        return response.json()
+
+    progress = call("GET", "/v1/summary")
+    cards = {card["id"]: card for card in call("GET", "/v1/tasks")}
+    jobs = [(o["task"], o["attempt"]) for o in progress["open"]] + [(ref, None) for ref in progress["remaining"]]
+    with Server(Relay(progress["gateway"])) as relay:
+
+        def attempt(job: tuple[str, str | None]) -> dict[str, Any]:
+            ref, token = job
+            card, status, error = cards[ref], None, None
+            try:
+                if token is None:
+                    opened = call("POST", "/v1/attempts", json={"task": ref, "harness": agent.name})
+                    token, card = opened["attempt"], opened["card"]
+                ctx = Context(card=card, attempt=token, gateway=relay.url, budget=budget)
+                try:
+                    submission = agent.run(ctx)
+                except Exception as exc:  # an agent crash is a failed attempt, never a failed run
+                    submission = Submission(status="not_found")
+                    error = f"{type(exc).__name__}: {exc}"[:500]
+                finally:
+                    ctx.close()
+                call("POST", f"/v1/attempts/{token}/submission", json={**submission.model_dump(), "usage": asdict(ctx.usage)})
+                status = submission.status
+            except (httpx.HTTPError, RuntimeError) as exc:
+                error = f"{type(exc).__name__}: {exc}"[:500]
+            return {"task": ref, "attempt": token, "status": status, "error": error}
+
+        with ThreadPoolExecutor(max_workers=max(1, concurrency)) as pool:
+            done = list(pool.map(attempt, jobs))
+    receipt = {"canary": CANARY, "osintgym": __version__, "api": api, "agent": agent.name, "budget": budget.as_dict(),
+               "concurrency": concurrency, "attempts": done, "progress": call("GET", "/v1/summary")}
+    client.close()
+    return receipt
 
 
 def save(report: dict[str, Any], path: str | Path) -> Path:

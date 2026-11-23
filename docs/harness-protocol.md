@@ -68,11 +68,50 @@ served the same way from osintgym.com.
 | Request | Effect |
 |---|---|
 | `GET /v1/tasks?level=0` | The task cards |
-| `POST /v1/attempts` with `{"task": ID, "level": 0, "harness": NAME}` | Opens an attempt and returns `{"attempt", "proxy", "card"}` |
+| `POST /v1/attempts` with `{"task": ID, "level": 0, "harness": NAME}` | Opens an attempt and returns `{"attempt", "card", "gateway", "proxy"}` |
 | `POST /v1/attempts/{attempt}/submission` with the submission JSON | Grades the attempt; with `--reveal` the grade is returned |
 | `GET /v1/summary` | Aggregate scores of the submissions received |
 
-Route the attempt's world traffic through the `proxy` URL it returns. Each attempt accepts one submission.
+The gateway can be reached in two ways. The `proxy` URL is an HTTP proxy whose user name is the attempt: route the
+attempt's world traffic through it. The `gateway` URL is the same world over plain requests, for clients that cannot
+use a proxy: `http://{host}/{path}?{query}` is fetched as `{gateway}/{host}/{path}?{query}`, with the same method and
+body, and the page that comes back is byte for byte the one the proxy serves. Resolve the links of a page against its
+world URL, not against the gateway URL. Each attempt accepts one submission.
+
+## The hidden split at osintgym.com
+
+The test split is served at `https://osintgym.com` by the same code, with a seed that is never published. It is
+reached only over HTTPS, so attempts return a `gateway` URL and no `proxy`. To run on it, ask for a run at
+contact@durandir.com, naming the system, the model and the harness as they should be listed, and the context level.
+You receive a run key, which every call carries as `Authorization: Bearer KEY`. The key is shown once; the server
+keeps only its digest.
+
+With the key in `OSINTGYM_KEY`, the reference harness and command harnesses run unchanged:
+
+```bash
+export OSINTGYM_KEY=ogk_...
+osintgym run --remote https://osintgym.com --agent command --command "python my_harness.py"
+osintgym run --remote https://osintgym.com --agent anthropic --model MODEL --price-input 4 --price-output 20
+```
+
+`--remote` takes the cards from the server, opens one attempt per task, starts a local relay so that `HTTP_PROXY`
+works as it does locally, and submits each answer. Started again with the same key, it resumes the attempts left open
+and skips the tasks already done. A harness that drives the API itself can use the gateway URLs directly, or run
+`osintgym relay --gateway https://osintgym.com/gateway` and use `http://ATTEMPT:x@127.0.0.1:8899` as its proxy.
+
+| Request (all with the run key) | Effect |
+|---|---|
+| `GET /v1/tasks` | The task cards, at the run's level |
+| `POST /v1/attempts` with `{"task": ID, "harness": NAME}` | Opens an attempt and returns `{"attempt", "card", "gateway"}` |
+| `POST /v1/attempts/{attempt}/submission` | Records the submission and returns `{"received": true}` |
+| `GET /v1/summary` | The run's progress: attempts opened and submitted, open attempts, remaining tasks |
+
+The rules that make a run verifiable are enforced by the server. A run opens one attempt per task, or as many as the
+repeats it was issued with, and every one of them counts: an attempt that is never submitted, and a task that is never
+opened, is graded as not found, so retrying or skipping cannot lift a score. Nothing about a submission is returned,
+neither its grade nor the answer, and the request log stays on the server. When the run is complete, it is graded as a
+whole and its row is published on the leaderboard as verified, with its declared budget; scores per family and per
+safeguard component are published, scores per task are not.
 
 ## Budgets
 

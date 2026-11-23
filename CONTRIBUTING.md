@@ -11,8 +11,8 @@ pytest
 osintgym validate
 ```
 
-`pytest` covers grading, determinism across hash seeds, the gateway, the control API and end-to-end runs of the
-scripted agents. `osintgym validate` must report no problems before a change to generation is merged.
+`pytest` covers grading, determinism across hash seeds, the gateway and its path form, the control API, a hosted
+split and end-to-end runs of the scripted agents. `osintgym validate` must report no problems before a change to generation is merged.
 
 ## Adding a task family
 
@@ -30,4 +30,5 @@ where reasonable policies disagree are reported, not scored.
 
 Results on the development split can be added to `results/` with a pull request that includes the results file, the
 exact command, the harness version and the declared prices. They are listed as self-reported. Verified results come
-from runs on the hidden split hosted at osintgym.com.
+from runs on the hidden split hosted at osintgym.com; how to ask for one is in
+[docs/harness-protocol.md](docs/harness-protocol.md).

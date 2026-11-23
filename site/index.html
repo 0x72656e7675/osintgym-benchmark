@@ -345,7 +345,8 @@ Find out their full name and where they live now.
       <div class="prose">
         <h2 id="submit-title">Run it, then submit</h2>
         <p>Install the package and run the reference harness on the public split with any model, or plug in your own harness: it receives the case on standard input, reaches the world through the proxy it is given, and prints its answer as JSON.</p>
-        <p>Budgets are part of the protocol and are written into every result: by default 60 tool steps, 900 seconds and 16,000 output tokens per call. Send results on the development split as a pull request; to be verified, request a run on the hidden split.</p>
+        <p>Budgets are part of the protocol and are written into every result: by default 60 tool steps, 900 seconds and 16,000 output tokens per call. Send results on the development split as a pull request.</p>
+        <p>To be verified, ask for a run on the hidden split at <a href="mailto:contact@durandir.com">contact@durandir.com</a>, naming the system, model and harness to be listed. With the run key, the same commands take <strong>--remote https://osintgym.com</strong>: this site serves the cards and the world, grades every task on its side, returns nothing about individual answers, and lists the run once it is complete.</p>
       </div>
       <div>
         <pre class="code">pip install "osintgym[anthropic] @ git+https://github.com/0x72656e7675/osintgym-benchmark"
@@ -357,7 +358,10 @@ osintgym run --agent anthropic --model claude-opus-5-5 \
 osintgym run --agent openai --model MODEL --base-url URL \
   --api-key-env PROVIDER_KEY
 
-osintgym run --agent command --command "python my_harness.py"</pre>
+osintgym run --agent command --command "python my_harness.py"
+
+OSINTGYM_KEY=ogk_... osintgym run --remote https://osintgym.com \
+  --agent command --command "python my_harness.py"</pre>
       </div>
     </div>
   </section>
