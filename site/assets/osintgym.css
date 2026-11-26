@@ -238,3 +238,6 @@ td.system .steps:hover { color: #fff; }
 .button:hover { background: rgba(255, 255, 255, 0.86); color: #000; }
 .button + .button:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
 .button svg { width: 20px; height: 20px; flex: none; }
+.hero-intro { max-width: 780px; margin-top: 34px; }
+.hero-intro p { margin: 0 0 16px; color: var(--text-78); font-size: 18px; line-height: 1.6; }
+.hero .about-actions { margin-top: 26px; }
