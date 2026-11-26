@@ -130,7 +130,7 @@ def test_hidden_split_keeps_keys_grades_and_log_on_the_server(dev, tmp_path):
 
     out = verify(store, run_id, tasks, web)
     row, integrity = out["row"], out["report"]["integrity"]
-    assert row["verified"] and row["kind"] == "submission" and row["seed"] == "hidden" and row["level"] == 1
+    assert row["kind"] == "durandir" and row["seed"] == "hidden" and row["level"] == 1
     assert integrity == {"submitted": 1, "unsubmitted": 1, "never_opened": len(tasks) - 2}
     assert len(out["report"]["results"]) == len(tasks)
     capability = [r for r in out["report"]["results"] if r["track"] == "capability"]

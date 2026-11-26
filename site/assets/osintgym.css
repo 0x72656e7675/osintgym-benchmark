@@ -217,3 +217,15 @@ pre.code { margin: 0 0 18px; padding: 22px 24px; overflow-x: auto; border-radius
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .burger i { transition: none; } }
 
 main { padding-bottom: 120px; }
+td.system .steps { margin-top: 8px; padding: 0; border: 0; background: none; color: var(--steel); font: 400 13px var(--font); cursor: pointer; }
+td.system .steps:hover { color: #fff; }
+.run-detail { margin-top: 44px; }
+.detail-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 22px; margin-bottom: 8px; }
+.detail-head a, .detail-head button { color: var(--steel); font: 400 14px var(--font); background: none; border: 0; padding: 0; cursor: pointer; }
+.attempt summary { display: grid; grid-template-columns: minmax(0, 1fr) 120px 60px 110px; gap: 16px; padding: 12px 0; cursor: pointer; list-style: none; font-size: 15px; }
+.attempt summary::-webkit-details-marker { display: none; }
+.attempt summary .task { color: var(--text); }
+.attempt summary span:not(.task) { color: var(--text-55); }
+.attempt-body { padding: 4px 0 22px; color: var(--text-78); font-size: 14px; }
+.attempt-body p { margin: 0 0 10px; overflow-wrap: anywhere; }
+.attempt-body pre { margin: 0; padding: 16px 18px; max-height: 340px; overflow: auto; border-radius: 6px; background: var(--fill); color: #dfe4e8; font: 12.5px/1.6 var(--mono); }

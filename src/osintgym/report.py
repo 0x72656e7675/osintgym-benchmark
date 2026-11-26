@@ -68,11 +68,12 @@ def markdown(report: dict[str, Any]) -> str:
     return "\n".join(out)
 
 
-def leaderboard_row(report: dict[str, Any], *, kind: str, verified: bool, model: str, harness: str,
-                    note: str = "") -> dict[str, Any]:
+def leaderboard_row(report: dict[str, Any], *, kind: str, model: str, harness: str, note: str = "",
+                    results: str | None = None) -> dict[str, Any]:
+    """kind is "reference" (scripted agents), "durandir" (runs Durandir made itself) or "self-reported"."""
     s = report["summary"]
     return {
-        "system": report["agent"], "model": model, "harness": harness, "kind": kind, "verified": verified, "note": note,
+        "system": report["agent"], "model": model, "harness": harness, "kind": kind, "note": note, "results": results,
         "date": report["started_at"][:10], "osintgym": report["osintgym"], "world_version": report["world_version"],
         "seed": report["seed"], "level": report["level"], "repeats": report["repeats"], "budget": report.get("budget"),
         "capability": s["capability"]["score"], "ci95": s["capability"]["ci95"], "accuracy": s["capability"]["accuracy"],

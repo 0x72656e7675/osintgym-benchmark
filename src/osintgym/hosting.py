@@ -28,7 +28,7 @@ def _digest(key: str) -> str:
 
 class Store:
     """What a hosted split keeps on disk: issued runs, known only by the digest of their key, the attempts they
-    opened, the request log, the submissions, and the rows published from verified runs. The service appends the
+    opened, the request log, the submissions, and the rows published from graded runs. The service appends the
     logs; the runs command edits runs and published rows. Only published rows are ever served."""
 
     def __init__(self, root: str | Path):
@@ -204,6 +204,6 @@ def verify(store: Store, run_id: str, tasks: list[Task], web: Web) -> dict[str, 
         "summary": summarize(results),
         "results": results,
     }
-    row = leaderboard_row(report, kind="submission", verified=True, model=run.get("model") or "",
+    row = leaderboard_row(report, kind="durandir", model=run.get("model") or "",
                           harness=run.get("harness") or "", note=run.get("note") or "")
     return {"report": report, "row": row}

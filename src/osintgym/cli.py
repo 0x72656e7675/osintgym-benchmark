@@ -79,7 +79,7 @@ def cmd_run(args) -> None:
         failed = sum(1 for a in receipt["attempts"] if a["error"])
         print(f"{len(receipt['attempts'])} attempts this session, {failed} with errors. The run has submitted "
               f"{progress['submitted']} of {progress['tasks'] * progress['repeats']} attempts; "
-              f"{len(progress['open'])} are open. Scores are published when the run is verified.")
+              f"{len(progress['open'])} are open. Scores are published when the run is graded.")
         print(f"Saved {path}")
         return
     world, tasks = _world(args)
@@ -103,12 +103,18 @@ def cmd_leaderboard(args) -> None:
     from .report import leaderboard_row
 
     rows = []
+    runs = Path(args.out).parent / "runs"
+    runs.mkdir(parents=True, exist_ok=True)
     for spec in args.entries:
         path, _, rest = spec.partition("=")
         fields = dict(p.split(":", 1) for p in rest.split(",") if ":" in p) if rest else {}
         report = json.loads(Path(path).read_text())
-        rows.append(leaderboard_row(report, kind=fields.get("kind", "submission"), verified=fields.get("verified") == "yes",
-                                    model=fields.get("model", ""), harness=fields.get("harness", ""), note=fields.get("note", "")))
+        # The complete results file is published next to the row, so every answer and request can be inspected.
+        published = runs / Path(path).name
+        published.write_text(Path(path).read_text())
+        rows.append(leaderboard_row(report, kind=fields.get("kind", "self-reported"), model=fields.get("model", ""),
+                                    harness=fields.get("harness", ""), note=fields.get("note", ""),
+                                    results=f"data/runs/{published.name}"))
     payload = {"canary": CANARY, "osintgym": __version__, "world_version": WORLD_VERSION, "rows": rows}
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(payload, indent=1) + "\n")
@@ -297,7 +303,7 @@ def main(argv: list[str] | None = None) -> None:
     p.set_defaults(func=cmd_report)
 
     p = sub.add_parser("leaderboard", help="build the site's leaderboard file from results files")
-    p.add_argument("entries", nargs="+", help="RESULT.json=kind:reference,model:...,harness:...,verified:yes")
+    p.add_argument("entries", nargs="+", help="RESULT.json=kind:reference|durandir|self-reported,model:...,harness:...,note:...")
     p.add_argument("--out", default="site/data/leaderboard.json")
     p.set_defaults(func=cmd_leaderboard)
 

@@ -28,7 +28,7 @@ where reasonable policies disagree are reported, not scored.
 
 ## Submitting results
 
-Results on the development split can be added to `results/` with a pull request that includes the results file, the
-exact command, the harness version and the declared prices. They are listed as self-reported. Verified results come
-from runs on the hidden split hosted at osintgym.com; how to ask for one is in
-[docs/harness-protocol.md](docs/harness-protocol.md).
+OSINTGym does not evaluate anyone. To list a result, open a pull request that adds the complete results file to
+`results/`, with the exact command, the harness version and the declared prices. It is published as received and
+listed as self-reported; the website opens every answer, citation and request in it. Durandir does not rerun, review
+or vouch for submitted results.

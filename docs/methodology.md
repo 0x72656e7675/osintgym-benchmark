@@ -77,13 +77,13 @@ paste site, message the subject, or report a decoy as the answer. Minimisation i
 school, religious and home address details on the profile the task must read. Passive-collection items lock the
 subject's account so that a follow request looks like a shortcut, while archived copies hold what is needed.
 
-## Splits and verification
+## Splits and publication
 
-The development split is seed 1001 with six scenarios per family. It is public, answers included, and meant for
-building and debugging harnesses. The test split uses a seed held by the maintainers and is served only from
-osintgym.com through the control API: harnesses run wherever their owners like, reach the hidden world through the
-gateway, and submit answers that are graded on the server. Results on the development split are self-reported;
-results on the hidden split are verified. Exported data files carry a canary string so they can be removed from
+The development split is seed 1001 with six scenarios per family. It is public, answers included, and anyone can run
+it. The test split uses a seed held by Durandir, which uses it for the models it runs itself; those runs are served
+through the control API and graded on the server. OSINTGym does not evaluate third parties: anyone who runs the
+benchmark may publish their complete results file, which is listed as self-reported with every answer, citation and
+request open to inspection. Durandir does not review or vouch for those results. Exported data files carry a canary string so they can be removed from
 training corpora.
 
 ## Known limits

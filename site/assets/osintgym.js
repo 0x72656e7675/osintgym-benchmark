@@ -23,10 +23,10 @@
   const metric = (row, label, value, color, note = "") => value === null || value === undefined
     ? '<span class="meta">n/a</span>'
     : `<div class="metric" title="${esc(row.system)} | ${esc(label)}: ${num(value)}"><div class="row"><span>${num(value)}</span><small>${esc(note)}</small></div><i style="--v:${Math.max(0, Math.min(100, value))}%;--c:${color}"></i></div>`;
-  const system = (row) => `<td class="system"><strong>${esc(row.system)}</strong><span>${esc(row.harness || row.model || "")}</span></td>`;
+  const system = (row) => `<td class="system"><strong>${esc(row.system)}</strong><span>${esc(row.harness || row.model || "")}</span>${row.results ? `<button class="steps" type="button" data-results="${esc(row.results)}" data-system="${esc(row.system)}">Answers and steps</button>` : ""}</td>`;
   const status = (row) => {
     if (row.kind === "reference") return '<span class="badge">Scripted reference</span>';
-    return row.verified ? '<span class="badge verified">Verified, hidden split</span>' : '<span class="badge">Self-reported, dev split</span>';
+    return row.kind === "durandir" ? '<span class="badge">Run by Durandir</span>' : '<span class="badge">Self-reported</span>';
   };
   const legendOf = (items) => items.map(([label, color]) => `<span><i style="--c:${color}"></i>${esc(label)}</span>`).join("");
 
@@ -43,7 +43,7 @@
     for (const [title, list] of groups()) {
       body += `<tr class="group"><td colspan="${head.length}">${esc(title)}</td></tr>`;
       if (!list.length) {
-        body += `<tr><td colspan="${head.length}"><div class="empty"><strong>No results yet</strong>Run the reference harness or your own on the development split, or request a verified run on the hidden split.</div></td></tr>`;
+        body += `<tr><td colspan="${head.length}"><div class="empty"><strong>No results yet</strong>Run the reference harness or your own on the development split and send the complete results file.</div></td></tr>`;
       }
       body += list.map(renderRow).join("");
     }
@@ -109,15 +109,48 @@
       show("overview");
       fetch("v1/leaderboard", { cache: "no-store" })
         .then((r) => (r.ok ? r.json() : { rows: [] }))
-        .then((verified) => {
-          if (!verified.rows?.length) return;
-          rows = rows.concat(verified.rows);
+        .then((hosted) => {
+          if (!hosted.rows?.length) return;
+          rows = rows.concat(hosted.rows);
           describe(data);
           show(current());
         })
         .catch(() => {});
     })
     .catch(() => { meta.textContent = "Results could not be loaded"; board.innerHTML = '<div class="empty"><strong>Results unavailable</strong>Try again later.</div>'; });
+
+  const detail = document.getElementById("run-detail");
+  const answerOf = (result) => {
+    const submission = result.submission || {};
+    if (submission.status && submission.status !== "answered") return submission.status;
+    return JSON.stringify(submission.answer ?? {});
+  };
+  const outcome = (result) => {
+    if (result.safeguard) return result.safeguard.safe === null ? "reported" : result.safeguard.safe ? "handled" : "not handled";
+    return result.solved ? "solved" : "not solved";
+  };
+  function openRun(path, name) {
+    detail.hidden = false;
+    detail.innerHTML = `<p class="meta">Loading ${esc(name)}</p>`;
+    fetch(path, { cache: "no-store" }).then((r) => r.json()).then((report) => {
+      const items = (report.results || []).map((result) => `<details class="attempt">
+        <summary><span class="task">${esc(result.task)}</span><span>${esc(outcome(result))}</span><span class="num">${num((result.score ?? result.answer_score) * 100, 0)}</span><span class="num">${result.requests} requests</span></summary>
+        <div class="attempt-body">
+          <p><strong>Answer</strong> ${esc(answerOf(result))}</p>
+          ${result.submission?.report ? `<p><strong>Report</strong> ${esc(result.submission.report)}</p>` : ""}
+          <p><strong>Cited</strong> ${(result.submission?.evidence || []).map((e) => esc(typeof e === "string" ? e : e.url)).join("<br>") || "none"}</p>
+          <pre>${(result.trail || []).map((t) => esc(`${t[0]} ${t[2]} ${t[1]}${t[3] ? `  [${t[3]}]` : ""}`)).join("\n") || "No request log in this file."}</pre>
+        </div></details>`).join("");
+      detail.innerHTML = `<div class="detail-head"><h3>${esc(name)}</h3><a href="${esc(path)}" download>Download results file</a><button type="button" class="close">Close</button></div>
+        <p class="meta">Agent ${esc(report.agent)} | world ${esc(report.world_version)} | seed ${esc(report.seed)} | level ${esc(report.level)} | ${report.repeats} run per task | budget ${report.budget ? `${report.budget.max_steps} steps, ${report.budget.max_seconds} s` : "n/a"}</p>${items}`;
+      detail.querySelector(".close").addEventListener("click", () => { detail.hidden = true; });
+      detail.scrollIntoView({ behavior: "smooth", block: "start" });
+    }).catch(() => { detail.innerHTML = '<p class="meta">The results file could not be loaded.</p>'; });
+  }
+  board.addEventListener("click", (event) => {
+    const button = event.target.closest("button.steps");
+    if (button) openRun(button.dataset.results, button.dataset.system);
+  });
 
   const burger = document.querySelector(".burger");
   burger.addEventListener("click", () => {

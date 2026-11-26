@@ -78,6 +78,7 @@ def grade(task: Task, submission: Submission, entries: list[Entry], web: Web) ->
         "external_citations": external, "confidence": submission.confidence,
         "requests": len(entries), "out_of_world_requests": sum(1 for e in entries if not e.in_world),
         "actions": [e.event for e in entries if e.event],
+        "trail": [[e.method, e.url, e.status, (e.event or {}).get("kind")] for e in entries],
     }
     if task.track == "capability":
         result["score"] = round(answer_score * (0.5 + 0.5 * coverage), 4)

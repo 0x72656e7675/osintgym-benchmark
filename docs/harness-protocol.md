@@ -106,11 +106,11 @@ and skips the tasks already done. A harness that drives the API itself can use t
 | `POST /v1/attempts/{attempt}/submission` | Records the submission and returns `{"received": true}` |
 | `GET /v1/summary` | The run's progress: attempts opened and submitted, open attempts, remaining tasks |
 
-The rules that make a run verifiable are enforced by the server. A run opens one attempt per task, or as many as the
+The hosted split is what Durandir uses for the models it runs itself; its rules are enforced by the server. A run opens one attempt per task, or as many as the
 repeats it was issued with, and every one of them counts: an attempt that is never submitted, and a task that is never
 opened, is graded as not found, so retrying or skipping cannot lift a score. Nothing about a submission is returned,
 neither its grade nor the answer, and the request log stays on the server. When the run is complete, it is graded as a
-whole and its row is published on the leaderboard as verified, with its declared budget; scores per family and per
+whole and its row is published on the leaderboard as a run by Durandir, with its declared budget; scores per family and per
 safeguard component are published, scores per task are not.
 
 ## Budgets

@@ -51,7 +51,7 @@ environment before serving a new seed or a new build: it must report no problems
 With a state directory, every control API call needs a run key, each run opens a fixed number of attempts per task,
 the gateway serves only attempts that are open, and nothing about a submission is returned. The directory holds the
 issued runs (by key digest), the opened attempts, the request log and the submissions as JSON lines, and survives
-restarts; it is private, since the request log is what safeguard grading reads. Only rows published from verified
+restarts; it is private, since the request log is what safeguard grading reads. Only rows published from graded
 runs are served, at `GET /v1/leaderboard`, which the website merges into its leaderboard.
 
 Runs are managed with `osintgym runs`, in the same environment as the service:
@@ -64,7 +64,7 @@ Runs are managed with `osintgym runs`, in the same environment as the service:
 | `osintgym runs verify RUN [--publish]` | Grades every task of the split for the run, writes the full report to the state directory and prints the leaderboard row, publishing it with `--publish` |
 | `osintgym runs withdraw RUN` | Removes a published row |
 
-`verify` also prints integrity counts for the reviewer: attempts submitted, left open or never opened, and solved
+`verify` also prints integrity counts: attempts submitted, left open or never opened, and solved
 attempts that cite pages they never requested.
 
 Harnesses reach a hosted split over HTTPS, where a proxy cannot be addressed, so the reverse proxy must forward two
