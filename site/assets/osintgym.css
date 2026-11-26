@@ -2,6 +2,8 @@
 @font-face { font-family: "Durandir Display"; src: url("fonts/satoshi-300.woff2") format("woff2"); font-weight: 300; font-display: swap; }
 @font-face { font-family: "Durandir Display"; src: url("fonts/satoshi-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Durandir Display"; src: url("fonts/satoshi-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Durandir Sans"; src: url("fonts/switzer-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Durandir Sans"; src: url("fonts/switzer-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 
 :root {
   --ink: #181818;
@@ -44,19 +46,18 @@ img { max-width: 100%; height: auto; }
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 58px; padding-inline: 24px;
   display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; isolation: isolate;
+  font-family: "Durandir Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 .nav::before {
   content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(24, 24, 24, 0.62);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
 }
-.brand { justify-self: start; font-size: 21px; font-weight: 400; letter-spacing: -0.01em; }
+.brand { justify-self: start; font-family: "Durandir Sans", ui-sans-serif, system-ui, sans-serif; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
 .nav-links { display: flex; gap: 26px; }
-.nav-links a, .nav-actions a { font-size: 14px; color: rgba(255, 255, 255, 0.92); }
+.nav-links a, .nav-actions a { font-size: 14px; font-weight: 500; line-height: 1; color: rgba(255, 255, 255, 0.92); }
 .nav-links a:hover, .nav-actions a:hover { color: var(--steel); }
-.nav-actions { justify-self: end; display: flex; align-items: center; gap: 8px; }
-.nav-actions a { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; line-height: 1; }
-.nav-actions a.cta { background: #fff; color: #000; }
-.nav-actions a.cta:hover { background: rgba(255, 255, 255, 0.86); color: #000; }
+.nav-actions { justify-self: end; display: flex; align-items: center; gap: 26px; }
+.nav-actions a { display: inline-flex; align-items: center; gap: 7px; }
 .nav-actions svg, .pill svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 .burger { display: none; width: 26px; height: 16px; padding: 0; border: 0; background: none; cursor: pointer; flex-direction: column; justify-content: space-between; justify-self: end; }
 .burger i { display: block; height: 2px; width: 100%; background: #fff; border-radius: 2px; transition: transform 200ms ease, opacity 200ms ease; }
@@ -72,7 +73,7 @@ body.menu-open .burger i:nth-child(2) { opacity: 0; }
 body.menu-open .burger i:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 /* Hero: case-file text under the blog cards' progressive blur, headline centred as on the Durandir home. */
-.hero { position: relative; min-height: min(92vh, 860px); display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--ink-deep); text-align: center; }
+.hero { position: relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--ink-deep); text-align: center; }
 .hero-bg {
   position: absolute; inset: -20px; margin: 0; padding: 80px 4vw 0; color: rgba(255, 255, 255, 0.34); text-align: left;
   font: 15px/1.7 var(--mono); white-space: pre-wrap; overflow: hidden; user-select: none;
@@ -88,7 +89,6 @@ body.menu-open .burger i:nth-child(3) { transform: translateY(-7px) rotate(-45de
   -webkit-mask-image: radial-gradient(62% 58% at 50% 56%, #000 38%, transparent 100%);
 }
 .hero-copy { position: relative; z-index: 2; padding: 120px 0 80px; display: flex; flex-direction: column; align-items: center; }
-.kicker { margin: 0 0 20px; color: var(--text-55); font-size: 14px; }
 .hero h1 { margin: 0; max-width: 18ch; font-weight: 300; font-size: clamp(44px, 6.4vw, 92px); line-height: 1.02; letter-spacing: -0.03em; }
 .hero h1 u { text-decoration-thickness: 2px; text-underline-offset: 0.12em; }
 .lede { max-width: 640px; margin: 26px 0 0; color: var(--text-78); font-size: 19px; line-height: 1.55; }
