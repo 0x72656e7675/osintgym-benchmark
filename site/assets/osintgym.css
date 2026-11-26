@@ -231,3 +231,6 @@ td.system .steps:hover { color: #fff; }
 .hero-intro p { margin: 0 0 16px; color: var(--text-78); font-size: 18px; line-height: 1.6; }
 .hero .about-actions { margin-top: 26px; }
 [hidden] { display: none !important; }
+.run { max-width: 860px; }
+.run h2 { margin-bottom: 20px; }
+.run p { margin: 0 0 26px; color: var(--text-78); font-size: 18px; }
