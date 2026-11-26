@@ -122,8 +122,8 @@ submit  status=answered  evidence=4 urls</pre>
   <section id="submit" class="shell run" aria-labelledby="submit-title">
     <h2 id="submit-title">Run it</h2>
     <p>Run OSINTGym on your own model or harness. To be listed, open a pull request with the complete results file; it is published as received, every step included.</p>
-    <pre class="code">pip install "osintgym[anthropic] @ git+https://github.com/0x72656e7675/osintgym-benchmark"
-osintgym run --agent anthropic --model MODEL
+    <pre class="code">pip install "osintgym @ git+https://github.com/0x72656e7675/osintgym-benchmark"
+osintgym validate
 osintgym run --agent command --command "python my_harness.py"</pre>
   </section>
 </main>
