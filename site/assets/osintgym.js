@@ -35,7 +35,7 @@
     return [
       ["Models and harnesses", rows.filter((r) => r.kind !== "reference").sort(byScore)],
       ["Reference agents", rows.filter((r) => r.kind === "reference").sort(byScore)],
-    ];
+    ].filter(([, list]) => list.length);
   }
 
   function table(head, renderRow) {
@@ -87,6 +87,13 @@
   };
 
   function show(view) {
+    const tabs = document.querySelector(".tabs");
+    tabs.hidden = !rows.length;
+    if (!rows.length) {
+      legend.hidden = true;
+      board.innerHTML = '<p class="empty">No results yet.</p>';
+      return;
+    }
     document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === view)));
     legend.innerHTML = legendOf(views[view].legend);
     legend.hidden = !views[view].legend.length;
@@ -97,6 +104,7 @@
 
   const current = () => document.querySelector('.tabs button[aria-selected="true"]')?.dataset.view || "overview";
   const describe = (data) => {
+    if (!rows.length) { meta.textContent = ""; return; }
     const latest = rows.map((r) => r.date).sort().pop();
     meta.textContent = `World ${data.world_version} | OSINTGym ${data.osintgym}${latest ? ` | updated ${latest}` : ""}`;
   };

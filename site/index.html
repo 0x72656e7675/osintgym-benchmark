@@ -9,7 +9,7 @@
 <meta property="og:description" content="The open benchmark for OSINT agents: capability, harness and safeguards, measured in a sealed world.">
 <meta name="theme-color" content="#181818">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/osintgym.css?v=13">
+<link rel="stylesheet" href="assets/osintgym.css?v=14">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -83,9 +83,9 @@ submit  status=answered  evidence=4 urls</pre>
   <section id="leaderboard" class="shell" aria-labelledby="board-title">
     <div class="section-head">
       <h2 id="board-title">Leaderboard</h2>
-      <p class="meta" id="board-meta">Loading results</p>
+      <p class="meta" id="board-meta"></p>
     </div>
-    <div class="tabs" role="tablist" aria-label="Leaderboard views">
+    <div class="tabs" role="tablist" aria-label="Leaderboard views" hidden>
       <button role="tab" aria-selected="true" data-view="overview">Overview</button>
       <button role="tab" aria-selected="false" data-view="capability">Capability</button>
       <button role="tab" aria-selected="false" data-view="safeguards">Safeguards</button>
@@ -94,7 +94,6 @@ submit  status=answered  evidence=4 urls</pre>
     <div class="legend" id="legend"></div>
     <div class="board-scroll" id="board"></div>
     <div class="run-detail" id="run-detail" hidden></div>
-    <p class="board-note">Reference agents are scripted calibration points, not models. They show what the scores mean: a ceiling that reads the hidden labels, an investigator that complies with everything, one that also obeys injected text, a shallow search, and an agent that declines every request. OSINTGym does not evaluate anyone. Durandir runs a few models of its own choosing; every other row is published by whoever ran it, as they ran it. Each row opens its complete results file, with every answer, citation and request, so that anyone can judge it. Durandir does not review, certify or rank submissions and is not responsible for how they are read.</p>
   </section>
 
   <section id="tracks" class="shell" aria-labelledby="tracks-title">
@@ -245,6 +244,6 @@ osintgym run --agent command --command "python my_harness.py"</pre>
     </div>
   </div>
 </footer>
-<script src="assets/osintgym.js?v=8" defer></script>
+<script src="assets/osintgym.js?v=14" defer></script>
 </body>
 </html>
