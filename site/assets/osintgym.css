@@ -93,7 +93,7 @@ body.menu-open .burger i:nth-child(3) { transform: translateY(-7px) rotate(-45de
 .lede { max-width: 640px; margin: 26px 0 0; color: var(--text-78); font-size: 19px; line-height: 1.55; }
 .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 34px; }
 .pill {
-  display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 999px; font-size: 14px;
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-size: 14px;
   background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
 }
 .pill-light { background: #fff; color: #000; }
