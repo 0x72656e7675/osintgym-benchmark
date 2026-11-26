@@ -229,3 +229,12 @@ td.system .steps:hover { color: #fff; }
 .attempt-body { padding: 4px 0 22px; color: var(--text-78); font-size: 14px; }
 .attempt-body p { margin: 0 0 10px; overflow-wrap: anywhere; }
 .attempt-body pre { margin: 0; padding: 16px 18px; max-height: 340px; overflow: auto; border-radius: 6px; background: var(--fill); color: #dfe4e8; font: 12.5px/1.6 var(--mono); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.about { max-width: 860px; padding-top: 120px; text-align: center; }
+.about p { margin: 0 0 22px; color: var(--text-78); font-size: 20px; line-height: 1.6; }
+.about-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 38px; }
+.button { --btn-ink: #fff; display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 8px; background: #fff; color: #000; font-size: 16px; }
+.button + .button { --btn-ink: #000; background: rgba(255, 255, 255, 0.12); color: #fff; }
+.button:hover { background: rgba(255, 255, 255, 0.86); color: #000; }
+.button + .button:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+.button svg { width: 20px; height: 20px; flex: none; }
