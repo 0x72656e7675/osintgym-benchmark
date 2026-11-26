@@ -9,7 +9,7 @@
 <meta property="og:description" content="The open benchmark for OSINT agents: capability, harness and safeguards, measured in a sealed world.">
 <meta name="theme-color" content="#181818">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/osintgym.css?v=4">
+<link rel="stylesheet" href="assets/osintgym.css?v=5">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -366,35 +366,55 @@ OSINTGYM_KEY=ogk_... osintgym run --remote https://osintgym.com \
   </section>
 </main>
 
-<footer>
-  <div class="shell footer-grid">
-    <div>
-      <a class="brand" href="/">OSINTGym</a>
-      <p class="meta" style="max-width:300px;margin-top:14px">An open benchmark for OSINT agents.</p>
+<footer class="durandir-foot">
+  <div class="durandir-foot-shell">
+    <div class="durandir-foot-top">
+      <div class="durandir-foot-brand">
+        <a href="https://durandir.com/" aria-label="Durandir"><img class="durandir-foot-logo" src="assets/durandir-logo-white.svg" alt="Durandir" width="136" height="32"></a>
+        <div class="durandir-foot-brand-details">
+          <div class="durandir-foot-contact">
+            <h2>Contact us</h2>
+            <ul>
+              <li><a href="mailto:contact@durandir.com">contact@durandir.com</a></li>
+            </ul>
+          </div>
+          <p class="durandir-foot-copyright">
+            <span>&copy; 2026 Durandir Technologies.</span>
+            <span>All rights reserved.</span>
+          </p>
+        </div>
+      </div>
+      <nav class="durandir-foot-col" aria-label="Company">
+        <h2>Company</h2>
+        <ul>
+          <li><a href="https://durandir.com/company/about/">About us</a></li>
+          <li><a href="https://durandir.com/company/team/">Team</a></li>
+          <li><a href="https://durandir.com/blog/">Blog</a></li>
+          <li><a href="https://durandir.com/docs/">Documentation</a></li>
+        </ul>
+      </nav>
+      <nav class="durandir-foot-col" aria-label="Legal">
+        <h2>Legal</h2>
+        <ul>
+          <li><a href="https://durandir.com/policy/terms-of-service/">Terms of Service</a></li>
+          <li><a href="https://durandir.com/policy/privacy-policy/">Privacy Policy</a></li>
+          <li><a href="https://durandir.com/policy/cookie-policy/">Cookie Policy</a></li>
+          <li><a href="https://durandir.com/policy/responsible-use/">Responsible use</a></li>
+          <li><a href="https://durandir.com/policy/our-responsibilities/">Our responsibilities</a></li>
+          <li><a href="https://durandir.com/security/vulnerability-disclosure/">Vulnerability Disclosure</a></li>
+          <li><a href="https://durandir.com/security/safeguards/">Safeguards</a></li>
+          <li><a href="https://durandir.com/security/local-processing/">Local processing</a></li>
+        </ul>
+      </nav>
+      <nav class="durandir-foot-col" aria-label="Social">
+        <h2>Social</h2>
+        <ul>
+          <li><a href="https://www.linkedin.com/company/durandir" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          <li><a href="https://x.com/durandirtech" target="_blank" rel="noopener noreferrer">X</a></li>
+          <li><a href="https://www.instagram.com/durandirtech" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+        </ul>
+      </nav>
     </div>
-    <div>
-      <span>Benchmark</span>
-      <a href="#leaderboard">Leaderboard</a>
-      <a href="https://github.com/0x72656e7675/osintgym-benchmark/blob/main/docs/methodology.md">Methodology</a>
-      <a href="https://github.com/0x72656e7675/osintgym-benchmark/blob/main/docs/conduct-policy.md">Conduct policy</a>
-      <a href="https://github.com/0x72656e7675/osintgym-benchmark/blob/main/docs/datasheet.md">Datasheet</a>
-    </div>
-    <div>
-      <span>Code</span>
-      <a href="https://github.com/0x72656e7675/osintgym-benchmark">GitHub</a>
-      <a href="https://github.com/0x72656e7675/osintgym-benchmark/blob/main/docs/harness-protocol.md">Harness protocol</a>
-      <a href="https://github.com/0x72656e7675/osintgym-benchmark/blob/main/docs/scoring.md">Scoring</a>
-      <a href="https://github.com/0x72656e7675/osintgym-benchmark/blob/main/CITATION.cff">Citation</a>
-    </div>
-    <div>
-      <span>Contact</span>
-      <a href="mailto:contact@durandir.com">contact@durandir.com</a>
-      <a href="https://durandir.com">durandir.com</a>
-    </div>
-  </div>
-  <div class="shell footer-base">
-    <a class="powered" href="https://durandir.com">Powered by <img src="assets/durandir-logo-white.svg" alt="Durandir" width="94" height="22"> Technologies</a>
-    <span>&copy; 2026 Durandir Technologies. Code Apache-2.0, data CC BY 4.0. Typeface Satoshi by the Indian Type Foundry.</span>
   </div>
 </footer>
 <script src="assets/osintgym.js?v=3" defer></script>
